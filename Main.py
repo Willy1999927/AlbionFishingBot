@@ -1,26 +1,39 @@
-import keyboard
-import time
-import ImageGrab as img
-import Input as inp
-import random
-import pyaudio
-import numpy as np
-import winsound
-import pyautogui
-import cv2
-import sys
 import os
 import psutil
-import win32gui
-import win32api
-import win32con
+import time             #time.sleep
+import random           #random.uniform, random.randint
+import numpy as np
+import winsound         #winsound.Beep
+import keyboard         #keyboard.is_pressed
+import pyautogui
+import pyaudio
 from PIL import ImageGrab
+import cv2
+
+def cast_rod():
+    pyautogui.mouseDown()
+    time.sleep(random.uniform(0.05, 1.5))
+    pyautogui.mouseUp()
+def hold():
+    pyautogui.mouseDown()
+def release():
+    pyautogui.mouseUp()
+def use_fishing_bait():
+    pyautogui.typewrite('1')
+
+def get_position():  # Grab image, then find the Buoy
+    capture = ImageGrab.grab(bbox=(839, 555, 1080, 556))  # Left, Upper, Right, Lower
+    threshold = 150
+    fn = lambda x: 255 if x > threshold else 0
+    nums = np.array(capture.convert('L').point(fn, mode='1')).astype(int)
+
+    for (x, y), value in np.ndenumerate(nums):
+        if value == 1:
+            return y + 7  
+    return -1
 
 while True:
     # Initialize Bot
-    albion = win32gui.FindWindow(0,'Albion Online Client')
-    albionpos = win32gui.GetWindowRect(albion)
-    print('HWND: ', albion, '\tPos: ',albionpos)    
     maxValue = 2**14
     bars = 35
     p=pyaudio.PyAudio()
@@ -98,7 +111,7 @@ while True:
             break
         fishpointselect = random.randint(0,fishpoint-1)
         pyautogui.moveTo(fishX[fishpointselect]+random.randint(-5,5), fishY[fishpointselect]+random.randint(-5,5))
-        inp.cast_rod()
+        cast_rod()
         over = False
         time.sleep(1.3)
         print('start to detect sound')
@@ -136,32 +149,32 @@ while True:
                 stream.stop_stream()
                 stream.close()
                 #print("L=[%s]\tR=[%s], Start to catch fish"%(np.max(dataL), np.max(dataR)))
-                inp.hold()  # Move Right
+                hold()  # Move Right
                 time.sleep(random.uniform(0.75, 0.8))
-                inp.release()
+                release()
                 #winsound.Beep(frequency, duration)
                 while True:  # While Fishing Bar Is On Screen
-                    position = img.get_position()
+                    position = get_position()
                     if position == -1:  # Fishing is Over
                         print('position is ', position, ', over')
-                        inp.release()
+                        release()
                         over = True
                         break
 
                     if position < 137:
-                        inp.hold()  
+                        hold()  
                         time.sleep(random.uniform(0.1, 0.15))
                     elif position > 145:
-                        inp.release()  
-                        time.sleep(random.uniform(0.005, 0.025))
-                        inp.hold()
-                        time.sleep(random.uniform(0.02, 0.03))
-                        inp.release()  
-                        time.sleep(random.uniform(0.005, 0.025))
+                        release()  
+                        time.sleep(random.uniform(0.005, 0.02))
+                        hold()
+                        time.sleep(random.uniform(0.025, 0.03))
+                        release()  
+                        time.sleep(random.uniform(0.005, 0.02))
                     elif position < 145:
-                        inp.hold()
+                        hold()
                         time.sleep(random.uniform(0.03, 0.08))
-                        inp.release() 
+                        release() 
             previoussum = volume
             if over==True:
                 for i in range(30):
