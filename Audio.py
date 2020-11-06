@@ -7,7 +7,7 @@ bars = 35
 p=pyaudio.PyAudio()
 
 #要找查的設備名稱中的關鍵字
-target = '立體聲混音'
+target = '立體聲混音' 
 #逐一查找聲音設備  
 for i in range(p.get_device_count()):
     devInfo = p.get_device_info_by_index(i)   
