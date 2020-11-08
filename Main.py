@@ -35,35 +35,38 @@ def get_position():  # Grab image, then find the Buoy
     return -1
 
 hwnd = win32gui.GetForegroundWindow()
-#win32gui.MoveWindow(hwnd,0,640,700,400,True)
-win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST,0,640,700,400, 0) 
+title = win32gui.GetWindowText(hwnd)
+print(title)
+if 'cmd.exe' in title or 'Main.exe' in title or 'Shell' in title:
+    win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST,0,640,700,400, 0) 
 
+# Initialize Bot
+maxValue = 2**14
+bars = 35
+p=pyaudio.PyAudio()
+
+# Find the name of the speaker. Stereo problably
+target = '立體聲混音'
+# Find the name  
+for i in range(p.get_device_count()):
+    devInfo = p.get_device_info_by_index(i)   
+    if devInfo['name'].find(target)>=0 and devInfo['hostApi'] == 0 :      
+        print(devInfo)
+        dev_idx = i
+        break
+p.terminate()
+imgB = cv2.imread('bar_blue.png')
+img_B, temp1, temp2 = cv2.split(imgB)
+#wB, hB = img_B.shape[::-1]
+imgR = cv2.imread('bar_red.png')
+temp1, temp2, img_R = cv2.split(imgR)
+#wR, hR = img_R.shape[::-1]
+thresholdB = 0.88
+thresholdR = 0.99
 
 while True:
-    # Initialize Bot
-    maxValue = 2**14
-    bars = 35
-    p=pyaudio.PyAudio()
-
-    # Find the name of the speaker. Stereo problably
-    target = '立體聲混音'
-    # Find the name  
-    for i in range(p.get_device_count()):
-        devInfo = p.get_device_info_by_index(i)   
-        if devInfo['name'].find(target)>=0 and devInfo['hostApi'] == 0 :      
-            print(devInfo)
-            dev_idx = i
-            break
-    imgB = cv2.imread('bar_blue.png')
-    img_B, temp1, temp2 = cv2.split(imgB)
-    #wB, hB = img_B.shape[::-1]
-    imgR = cv2.imread('bar_red.png')
-    temp1, temp2, img_R = cv2.split(imgR)
-    #wR, hR = img_R.shape[::-1]
-    thresholdB = 0.88
-    thresholdR = 0.99
     print("Bot Starting Up, Good Luck")
-
+    p=pyaudio.PyAudio()
     fishpoint = 0
     fishX = []
     fishY = []
@@ -138,15 +141,6 @@ while True:
                 chunkcount = 0
             starString = "#"*volume+"-"*int(bars-volume)
             print("Volume=[%s]"%(starString))
-            #data = np.frombuffer(stream.read(1024),dtype=np.int16)
-            #dataL = data[0::2]
-            #dataR = data[1::2]
-            #peakL = np.abs(np.max(dataL)-np.min(dataL))/maxValue
-            #peakR = np.abs(np.max(dataR)-np.min(dataR))/maxValue
-            #lString = "#"*int(peakL*bars)+"-"*int(bars-peakL*bars)
-            #rString = "#"*int(peakR*bars)+"-"*int(bars-peakR*bars)
-            #print("L=[%s]\tR=[%s]"%(lString, rString))
-            #volume = int(peakL*bars + peakR*bars)
             if keyboard.is_pressed('F12'):
                 break
             count = count + 1
@@ -178,13 +172,14 @@ while True:
                         release()  
                         time.sleep(random.uniform(0.005, 0.02))
                         hold()
-                        time.sleep(random.uniform(0.025, 0.6))
-                        release()  
-                        time.sleep(random.uniform(0.005, 0.013))
+                        time.sleep(random.uniform(0.035, 0.6))
+                        if random.randint(0,1) == 1:
+                            release()
+                            time.sleep(random.uniform(0.005, 0.013))
                     elif position < 145:
                         hold()
                         time.sleep(random.uniform(0.03, 0.08))
-                        release() 
+                        release()
             previoussum = volume
             if over==True:
                 for i in range(30):
