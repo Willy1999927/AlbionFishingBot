@@ -3,6 +3,8 @@ import psutil
 import time             #time.sleep
 import random           #random.uniform, random.randint
 import numpy as np
+import win32gui
+import win32con
 import winsound         #winsound.Beep
 import keyboard         #keyboard.is_pressed
 import pyautogui
@@ -12,7 +14,7 @@ import cv2
 
 def cast_rod():
     pyautogui.mouseDown()
-    time.sleep(random.uniform(0.05, 1.5))
+    time.sleep(random.uniform(0.12, 1.5))
     pyautogui.mouseUp()
 def hold():
     pyautogui.mouseDown()
@@ -31,6 +33,11 @@ def get_position():  # Grab image, then find the Buoy
         if value == 1:
             return y + 7  
     return -1
+
+hwnd = win32gui.GetForegroundWindow()
+#win32gui.MoveWindow(hwnd,0,640,700,400,True)
+win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST,0,640,700,400, 0) 
+
 
 while True:
     # Initialize Bot
@@ -67,6 +74,7 @@ while True:
             fishX.append(x)
             fishY.append(y)
             print("add point [%d], [%d]"%(x,y))
+            winsound.Beep(523, 200)
             time.sleep(0.5)
         
         if keyboard.is_pressed('F10'):
@@ -75,6 +83,7 @@ while True:
                 x, y = pyautogui.position()
                 fishX.append(x)
                 fishY.append(y)
+            winsound.Beep(587, 200)
             break
         
     while True:
@@ -113,7 +122,7 @@ while True:
         pyautogui.moveTo(fishX[fishpointselect]+random.randint(-5,5), fishY[fishpointselect]+random.randint(-5,5))
         cast_rod()
         over = False
-        time.sleep(1.3)
+        time.sleep(1.8)
         print('start to detect sound')
         stream=p.open(input_device_index=dev_idx,format=pyaudio.paInt16,channels=2,rate=44100, input=True, frames_per_buffer=1024)
         previoussum = 0
@@ -149,6 +158,7 @@ while True:
                 stream.stop_stream()
                 stream.close()
                 #print("L=[%s]\tR=[%s], Start to catch fish"%(np.max(dataL), np.max(dataR)))
+                pyautogui.moveTo(fishX[fishpointselect]+random.randint(-5,5), fishY[fishpointselect]+random.randint(-5,5))
                 hold()  # Move Right
                 time.sleep(random.uniform(0.75, 0.8))
                 release()
@@ -168,9 +178,9 @@ while True:
                         release()  
                         time.sleep(random.uniform(0.005, 0.02))
                         hold()
-                        time.sleep(random.uniform(0.025, 0.03))
+                        time.sleep(random.uniform(0.025, 0.6))
                         release()  
-                        time.sleep(random.uniform(0.005, 0.02))
+                        time.sleep(random.uniform(0.005, 0.013))
                     elif position < 145:
                         hold()
                         time.sleep(random.uniform(0.03, 0.08))
@@ -192,5 +202,5 @@ while True:
             break
 
     p.terminate()
-    winsound.Beep(600, 200)
+    winsound.Beep(784, 200)
     os.system('cls')
