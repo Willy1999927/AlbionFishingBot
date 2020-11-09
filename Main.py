@@ -34,6 +34,7 @@ def get_position():  # Grab image, then find the Buoy
             return y + 7  
     return -1
 
+#setup console window
 hwnd = win32gui.GetForegroundWindow()
 title = win32gui.GetWindowText(hwnd)
 print(title)
@@ -43,18 +44,25 @@ if 'cmd.exe' in title or 'Main.exe' in title or 'Shell' in title:
 # Initialize Bot
 maxValue = 2**14
 bars = 35
-p=pyaudio.PyAudio()
-
 # Find the name of the speaker. Stereo problably
 target = '立體聲混音'
-# Find the name  
+p=pyaudio.PyAudio()
+# Find the name
+dev_idx = -1
 for i in range(p.get_device_count()):
     devInfo = p.get_device_info_by_index(i)   
     if devInfo['name'].find(target)>=0 and devInfo['hostApi'] == 0 :      
         print(devInfo)
         dev_idx = i
         break
+if dev_idx == -1:
+    print('Can not find ', target)
+    for i in range(p.get_device_count()):
+        devInfo = p.get_device_info_by_index(i)
+        print (devInfo)
+    dev_idx = int(input('please input the audio device index: '))
 p.terminate()
+#load in figures
 imgB = cv2.imread('bar_blue.png')
 img_B, temp1, temp2 = cv2.split(imgB)
 #wB, hB = img_B.shape[::-1]
@@ -71,12 +79,12 @@ while True:
     fishX = []
     fishY = []
     while True:
-        if keyboard.is_pressed('F11'):
+        if keyboard.is_pressed('F11'):  #F11 to add a new fishing point
             fishpoint = fishpoint+1
             x, y = pyautogui.position()
             fishX.append(x)
             fishY.append(y)
-            print("add point [%d], [%d]"%(x,y))
+            print("add fishing point [%d], [%d]"%(x,y)) #F10 to start
             winsound.Beep(523, 200)
             time.sleep(0.5)
         
@@ -157,29 +165,45 @@ while True:
                 time.sleep(random.uniform(0.75, 0.8))
                 release()
                 #winsound.Beep(frequency, duration)
+                old_position = 0
+                velocity = 0
+                times = 0
                 while True:  # While Fishing Bar Is On Screen
                     position = get_position()
+                    #velocity = position-old_position
+                    #old_position = position
+                    #times = times + 1
                     if position == -1:  # Fishing is Over
                         print('position is ', position, ', over')
                         release()
                         over = True
                         break
 
+##                    if position < 137:
+##                        hold()  
+##                        time.sleep(random.uniform(0.1, 0.15))
+##                    elif position > 145:
+##                        release()  
+##                        time.sleep(random.uniform(0.005, 0.02))
+##                        hold()
+##                        time.sleep(random.uniform(0.035, 0.6))
+##                        if random.randint(0,1) == 1:
+##                            release()
+##                            time.sleep(random.uniform(0.005, 0.013))
+##                    elif position < 145:
+##                        hold()
+##                        time.sleep(random.uniform(0.03, 0.08))
+##                        release()
                     if position < 137:
-                        hold()  
+                        hold()
                         time.sleep(random.uniform(0.1, 0.15))
                     elif position > 145:
-                        release()  
+                        release()
                         time.sleep(random.uniform(0.005, 0.02))
                         hold()
-                        time.sleep(random.uniform(0.035, 0.6))
-                        if random.randint(0,1) == 1:
-                            release()
-                            time.sleep(random.uniform(0.005, 0.013))
-                    elif position < 145:
+                        time.sleep(random.uniform(0.1, 0.6))
+                    else:
                         hold()
-                        time.sleep(random.uniform(0.03, 0.08))
-                        release()
             previoussum = volume
             if over==True:
                 for i in range(30):
@@ -193,7 +217,7 @@ while True:
                 break
             if keyboard.is_pressed('F12'):
                 break
-        if keyboard.is_pressed('F12'):
+        if keyboard.is_pressed('F12'):      #F12 to stop
             break
 
     p.terminate()
