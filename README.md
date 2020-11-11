@@ -28,6 +28,7 @@ pip install psutil
 pip install numpy  
 pip install pywin32  
 pip install keyboard  
+pip install pyautogui  
 pip install pipwin  
 pipwin install pyaudio  
 pip install pillow  
