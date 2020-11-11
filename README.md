@@ -11,3 +11,17 @@ Tested on Windows 10. system volume: 30. Game setting: overall volume: 10. sound
 Tested on Windows 7.  same configuration.
 
 I can not deal with the speaker instrument problem for you.
+
+
+# Hint for packages installation
+Python 3.9 64 bits version is suggested for future support
+python -m pip install --upgrade pip
+pip install psutil
+pip install numpy
+pip install pywin32
+pip install keyboard
+pip install pipwin
+pipwin install pyaudio
+pip install PIL
+pip install opencv-python
+pip install keras         -> This only works for x64 version Python
