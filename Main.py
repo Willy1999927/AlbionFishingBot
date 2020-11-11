@@ -3,6 +3,8 @@ import psutil
 import time             #time.sleep
 import random           #random.uniform, random.randint
 import numpy as np
+#from matplotlib import pyplot
+#import threading
 import win32gui
 import win32con
 import winsound         #winsound.Beep
@@ -11,10 +13,18 @@ import pyautogui
 import pyaudio
 from PIL import ImageGrab
 import cv2
+import PySimpleGUI as GUI
 
+def beep():
+    winsound.Beep(523, 500)
+
+def move(duration):
+    pyautogui.mouseDown(button='right')
+    time.sleep(duration)
+    pyautogui.mouseUp(button='right')
 def cast_rod():
     pyautogui.mouseDown()
-    time.sleep(random.uniform(0.12, 1.5))
+    time.sleep(random.uniform(0.2, 1.3))
     pyautogui.mouseUp()
 def hold():
     pyautogui.mouseDown()
@@ -38,10 +48,27 @@ def get_position():  # Grab image, then find the Buoy
 hwnd = win32gui.GetForegroundWindow()
 title = win32gui.GetWindowText(hwnd)
 print(title)
-if 'cmd.exe' in title or 'Main.exe' in title or 'Shell' in title:
-    win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST,0,640,700,400, 0) 
+
+#setup file record
+if os.path.exists('succ.txt') == False:
+    file_succ = open('succ.txt','w')
+    file_succ.write('0000')
+    file_succ.close()
+if os.path.exists('fail.txt') == False:
+    file_fail = open('fail.txt','w')
+    file_fail.write('0000')
+    file_fail.close()   
+file_succ = open('succ.txt','r')
+succ_count = int(file_succ.read())
+print (succ_count)
+file_succ.close()
+file_fail = open('fail.txt','r')
+fail_count = int(file_fail.read())
+print (fail_count)
+file_fail.close()
 
 # Initialize Bot
+volume_factor = 1
 maxValue = 2**14
 bars = 35
 # Find the name of the speaker. Stereo problably
@@ -72,6 +99,9 @@ temp1, temp2, img_R = cv2.split(imgR)
 thresholdB = 0.88
 thresholdR = 0.99
 
+if 'cmd.exe' in title or 'Main.exe' in title or 'Shell' in title:
+    win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST,0,600,640,480, 0)
+
 while True:
     print("Bot Starting Up, Good Luck")
     p=pyaudio.PyAudio()
@@ -79,16 +109,26 @@ while True:
     fishX = []
     fishY = []
     while True:
-        if keyboard.is_pressed('F11'):  #F11 to add a new fishing point
-            fishpoint = fishpoint+1
-            x, y = pyautogui.position()
-            fishX.append(x)
-            fishY.append(y)
-            print("add fishing point [%d], [%d]"%(x,y)) #F10 to start
-            winsound.Beep(523, 200)
-            time.sleep(0.5)
-        
-        if keyboard.is_pressed('F10'):
+        if keyboard.is_pressed('F9'):   #F9 to automatically adjust volume factor
+            stream=p.open(input_device_index=dev_idx,format=pyaudio.paInt16,channels=2,rate=44100, input=True, frames_per_buffer=1024)
+            #t = threading.Thread(target = beep)
+            #t.start()
+            #time.sleep(0)
+            beep()
+            data = np.frombuffer(stream.read(int(22000)),dtype=np.int16)
+            #dataL = data[0::2]
+            #dataR = data[1::2]
+            volume = int(np.abs(np.max(data)-np.min(data))*bars/maxValue)
+            stream.stop_stream()
+            stream.close()
+            print('max - min = ', int(np.abs(np.max(data)-np.min(data))))
+            #print(np.sqrt(np.mean(data**2)))
+            volume_factor = int(np.abs(np.max(data)-np.min(data)))/1120     # 1120 for reference
+            print('factor = ',volume_factor)
+            #pyplot.plot(dataL)
+            #pyplot.plot(dataR)
+            #pyplot.show()
+        if keyboard.is_pressed('F10'):  #F10 to start
             if fishpoint<1:
                 fishpoint = fishpoint+1
                 x, y = pyautogui.position()
@@ -96,6 +136,15 @@ while True:
                 fishY.append(y)
             winsound.Beep(587, 200)
             break
+        if keyboard.is_pressed('F11'):  #F11 to add a new fishing point
+            fishpoint = fishpoint+1
+            x, y = pyautogui.position()
+            fishX.append(x)
+            fishY.append(y)
+            print("add fishing point [%d], [%d]"%(x,y)) 
+            winsound.Beep(523, 200)
+            time.sleep(0.5)
+        
         
     while True:
         print('CPU: ',psutil.cpu_percent())
@@ -112,7 +161,7 @@ while True:
             #print (np.count_nonzero(res >= thresholdB))
             if np.count_nonzero(res >= thresholdB)>0:
                 for pt in zip(*loc[::-1]):
-                    print(pt)
+                    print(pt, '               ')
                 time.sleep(random.uniform(10, 20))
                 playerexist = True
                 continue
@@ -131,6 +180,8 @@ while True:
             break
         fishpointselect = random.randint(0,fishpoint-1)
         pyautogui.moveTo(fishX[fishpointselect]+random.randint(-5,5), fishY[fishpointselect]+random.randint(-5,5))
+        if fishpoint == 1:
+            move(random.uniform(0.2, 0.5))
         cast_rod()
         over = False
         time.sleep(1.8)
@@ -142,13 +193,13 @@ while True:
         while True:
             print('Sound detecting                          ', end = ' \r')
             data = np.frombuffer(stream.read(4096),dtype=np.int16)
-            volume = int(np.abs(np.max(data)-np.min(data))*bars/maxValue)
+            volume = int(np.abs(np.max(data)-np.min(data))*volume_factor*bars/maxValue)
             if volume>0:
                 chunkcount = chunkcount+1
             elif previoussum==0:
                 chunkcount = 0
-            starString = "#"*volume+"-"*int(bars-volume)
-            print("Volume=[%s]"%(starString))
+            starString = "#"*volume+"-"*int(bars-volume-15)
+            print("Volume=[%s]"%(starString),' ', int(np.abs(np.max(data)-np.min(data))), ' ', int(np.sqrt(np.mean(data**2))))
             if keyboard.is_pressed('F12'):
                 break
             count = count + 1
@@ -162,7 +213,7 @@ while True:
                 #print("L=[%s]\tR=[%s], Start to catch fish"%(np.max(dataL), np.max(dataR)))
                 pyautogui.moveTo(fishX[fishpointselect]+random.randint(-5,5), fishY[fishpointselect]+random.randint(-5,5))
                 hold()  # Move Right
-                time.sleep(random.uniform(0.75, 0.8))
+                time.sleep(random.uniform(0.9, 1.0))
                 release()
                 #winsound.Beep(frequency, duration)
                 old_position = 0
@@ -172,11 +223,28 @@ while True:
                     position = get_position()
                     #velocity = position-old_position
                     #old_position = position
-                    #times = times + 1
+                    times = times + 1
                     if position == -1:  # Fishing is Over
                         print('position is ', position, ', over')
                         release()
                         over = True
+                        dataL = data[0::2]
+                        dataR = data[1::2]
+                        data_new = dataL + dataR
+                        if times == 1:
+                            print ('noise around')
+                            time.sleep(random.uniform(5, 30))
+                            np.save("fail_%04d"%fail_count,data_new)
+                            fail_count = fail_count + 1
+                            file_fail = open('fail.txt','w')
+                            file_fail.write('%04d'%fail_count)
+                            file_fail.close()
+                        else:
+                            np.save("succ_%04d"%succ_count,data_new)
+                            succ_count = succ_count + 1
+                            file_succ = open('succ.txt','w')
+                            file_succ.write('%04d'%succ_count)
+                            file_succ.close()
                         break
 
 ##                    if position < 137:
@@ -199,7 +267,7 @@ while True:
                         time.sleep(random.uniform(0.1, 0.15))
                     elif position > 145:
                         release()
-                        time.sleep(random.uniform(0.005, 0.02))
+                        time.sleep(max(random.uniform(0.005, 0.02)-times/30000.,0))
                         hold()
                         time.sleep(random.uniform(0.1, 0.6))
                     else:
