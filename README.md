@@ -15,7 +15,7 @@ I can not deal with the speaker instrument problem for you.
 
 
 # Hint for packages installation
-Python 3.9 64 bits version is suggested for future support
+Python 3.8.6 64 bits version is suggested for future support
 
 python -m pip install --upgrade pip
 
@@ -31,7 +31,7 @@ pip install pipwin
 
 pipwin install pyaudio
 
-pip install PIL
+pip install pillow
 
 pip install opencv-python
 
