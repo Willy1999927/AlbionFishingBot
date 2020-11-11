@@ -8,6 +8,7 @@ This is a fully automatic bot that fishes in Albion Online. The functions includ
 The method of detecting fish catches is by sound, pyaudio lib. Please adjust the code yourself to fit your audio instrument and OS. Probably you need to edit the name of the speaker (Stereo or something probably) and the threshold to make this bot work.
 
 Tested on Windows 10. system volume: 30. Game setting: overall volume: 10. sound effect 75. 1920 * 1080, HUD 100% scale.
+
 Tested on Windows 7.  same configuration.
 
 I can not deal with the speaker instrument problem for you.
@@ -15,13 +16,23 @@ I can not deal with the speaker instrument problem for you.
 
 # Hint for packages installation
 Python 3.9 64 bits version is suggested for future support
+
 python -m pip install --upgrade pip
+
 pip install psutil
+
 pip install numpy
+
 pip install pywin32
+
 pip install keyboard
+
 pip install pipwin
+
 pipwin install pyaudio
+
 pip install PIL
+
 pip install opencv-python
+
 pip install keras         -> This only works for x64 version Python
