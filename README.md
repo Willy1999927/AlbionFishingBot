@@ -12,6 +12,12 @@ Tested on Windows 7.  same configuration.
 
 I can not deal with the speaker instrument problem for you.
 
+# User Guide
+F9 for automatically adjust the volume factor. This function is used to balance the volume differences among different computers. The function is still uder developed and tested.
+
+F10 for starting the bot. Please stay your mouse at the fishing point before pressing F10.
+
+F11 for adding a fishing point. Please stay your mouse at the fishing point before pressing F11. You can set multiple fishing points to cast rod to multiple directions.
 
 # Hint for packages installation
 Python 3.8.6 64 bits version is suggested for future support  
