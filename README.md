@@ -19,6 +19,8 @@ F10 for starting the bot. Please stay your mouse at the fishing point before pre
 
 F11 for adding a fishing point. Please stay your mouse at the fishing point before pressing F11. You can set multiple fishing points to cast rod to multiple directions.
 
+F12 for stoping the bot. Or you can just use Ctrl+C to stop the running porcess at the command line.
+
 # Hint for packages installation
 Python 3.8.6 64 bits version is suggested for future support  
 python -m pip install --upgrade pip  
