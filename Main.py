@@ -1,11 +1,11 @@
 import os
 import psutil
-import time             #time.sleep
+import time             #time.sleep, time.time
 import random           #random.uniform, random.randint
 import numpy as np
 #from matplotlib import pyplot
 #import threading
-import win32gui
+from win32gui import GetForegroundWindow,GetWindowText,SetWindowPos
 import win32con
 import winsound         #winsound.Beep
 import keyboard         #keyboard.is_pressed
@@ -13,7 +13,8 @@ import pyautogui
 import pyaudio
 from PIL import ImageGrab
 import cv2
-import PySimpleGUI as GUI
+from keras.models import Sequential, load_model
+#import PySimpleGUI as GUI
 
 def beep():
     winsound.Beep(523, 500)
@@ -45,32 +46,20 @@ def get_position():  # Grab image, then find the Buoy
     return -1
 
 #setup console window
-hwnd = win32gui.GetForegroundWindow()
-title = win32gui.GetWindowText(hwnd)
+hwnd = GetForegroundWindow()
+title = GetWindowText(hwnd)
 print(title)
 
-#setup file record
-if os.path.exists('succ.txt') == False:
-    file_succ = open('succ.txt','w')
-    file_succ.write('0000')
-    file_succ.close()
-if os.path.exists('fail.txt') == False:
-    file_fail = open('fail.txt','w')
-    file_fail.write('0000')
-    file_fail.close()   
-file_succ = open('succ.txt','r')
-succ_count = int(file_succ.read())
-print (succ_count)
-file_succ.close()
-file_fail = open('fail.txt','r')
-fail_count = int(file_fail.read())
-print (fail_count)
-file_fail.close()
+# setup NN model
+enable_NN = True        #disable this if you do not have the model
+if enable_NN:
+    NN_model = load_model('NN_model')
 
 # Initialize Bot
 volume_factor = 1
 maxValue = 2**14
 bars = 35
+timer = time.time()
 # Find the name of the speaker. Stereo problably
 target = '立體聲混音'
 p=pyaudio.PyAudio()
@@ -97,10 +86,10 @@ imgR = cv2.imread('bar_red.png')
 temp1, temp2, img_R = cv2.split(imgR)
 #wR, hR = img_R.shape[::-1]
 thresholdB = 0.88
-thresholdR = 0.99
+thresholdR = 0.95
 
 if 'cmd.exe' in title or 'Main.exe' in title or 'Shell' in title:
-    win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST,0,600,640,480, 0)
+    SetWindowPos(hwnd, win32con.HWND_TOPMOST,0,600,640,480, 0)
 
 while True:
     print("Bot Starting Up, Good Luck")
@@ -154,23 +143,24 @@ while True:
         playerexist = False
         while True:
             print('Player detecting                            ', end = ' \r')
-            capture = np.array(ImageGrab.grab(bbox=(50, 70, 1870, 1030)))  # Left, Upper, Right, Lower
+            capture = np.array(ImageGrab.grab(bbox=(50, 70, 1770, 1030)))  # Left, Upper, Right, Lower
             capture_R, capture_G, capture_B = cv2.split(capture)
             res = cv2.matchTemplate(capture_B,img_B,cv2.TM_CCOEFF_NORMED)
             loc = np.where(res >= thresholdB)
             #print (np.count_nonzero(res >= thresholdB))
             if np.count_nonzero(res >= thresholdB)>0:
                 for pt in zip(*loc[::-1]):
-                    print(pt, '               ')
+                    print(pt, ' B              ')
                 time.sleep(random.uniform(10, 20))
                 playerexist = True
                 continue
             res = cv2.matchTemplate(capture_R,img_R,cv2.TM_CCOEFF_NORMED)
             loc = np.where( res >= thresholdR)
+            print (np.max(res),'               ')
             #print (np.count_nonzero(res >= thresholdR))
             if np.count_nonzero(res >= thresholdR)>0:
                 for pt in zip(*loc[::-1]):
-                    print(pt)
+                    print(pt, ' R              ')
                 time.sleep(random.uniform(10, 20))
                 playerexist = True
                 continue
@@ -180,11 +170,11 @@ while True:
             break
         fishpointselect = random.randint(0,fishpoint-1)
         pyautogui.moveTo(fishX[fishpointselect]+random.randint(-5,5), fishY[fishpointselect]+random.randint(-5,5))
-        if fishpoint == 1:
-            move(random.uniform(0.2, 0.5))
+        #if fishpoint == 1:
+        #    move(random.uniform(0.2, 0.5))
         cast_rod()
         over = False
-        time.sleep(1.8)
+        time.sleep(3.0)
         print('start to detect sound')
         stream=p.open(input_device_index=dev_idx,format=pyaudio.paInt16,channels=2,rate=44100, input=True, frames_per_buffer=1024)
         previoussum = 0
@@ -199,30 +189,37 @@ while True:
             elif previoussum==0:
                 chunkcount = 0
             starString = "#"*volume+"-"*int(bars-volume-15)
-            print("Volume=[%s]"%(starString),' ', int(np.abs(np.max(data)-np.min(data))), ' ', int(np.sqrt(np.mean(data**2))))
+            print("Volume=[%s]"%(starString))
             if keyboard.is_pressed('F12'):
                 break
             count = count + 1
-            if count > 1000:
+            if count > 1500:
+                move(0.1)
                 break
             if volume>=6 or volume+previoussum>=9:
                 if volume>=9 and chunkcount>3:
                     continue
+                if enable_NN:
+                    dataL = data[0::2]
+                    dataR = data[1::2]
+                    data_new = np.array(dataL + dataR).reshape(1,4096)
+                    succ = np.round(NN_model.predict(data_new))
+                    if succ==0:
+                        print('\nNN: this is not a fish')
+                        np.frombuffer(stream.read(4096*10),dtype=np.int16)
+                        continue
+                    else:
+                        print('\nNN: a fish comes')
                 stream.stop_stream()
                 stream.close()
                 #print("L=[%s]\tR=[%s], Start to catch fish"%(np.max(dataL), np.max(dataR)))
                 pyautogui.moveTo(fishX[fishpointselect]+random.randint(-5,5), fishY[fishpointselect]+random.randint(-5,5))
-                hold()  # Move Right
+                hold()  # catch fish
                 time.sleep(random.uniform(0.9, 1.0))
                 release()
-                #winsound.Beep(frequency, duration)
-                old_position = 0
-                velocity = 0
                 times = 0
                 while True:  # While Fishing Bar Is On Screen
                     position = get_position()
-                    #velocity = position-old_position
-                    #old_position = position
                     times = times + 1
                     if position == -1:  # Fishing is Over
                         print('position is ', position, ', over')
@@ -232,19 +229,21 @@ while True:
                         dataR = data[1::2]
                         data_new = dataL + dataR
                         if times == 1:
+                            time.sleep(0.3)
+                            if get_position() != -1:
+                                continue
                             print ('noise around')
                             time.sleep(random.uniform(5, 30))
-                            np.save("fail_%04d"%fail_count,data_new)
-                            fail_count = fail_count + 1
-                            file_fail = open('fail.txt','w')
-                            file_fail.write('%04d'%fail_count)
-                            file_fail.close()
+                            np.save(time.strftime("data/fail_%Y%m%d-%H%M%S"),data_new)
                         else:
-                            np.save("succ_%04d"%succ_count,data_new)
-                            succ_count = succ_count + 1
-                            file_succ = open('succ.txt','w')
-                            file_succ.write('%04d'%succ_count)
-                            file_succ.close()
+                            if time.time()-timer > 1800:
+                                timer = time.time()
+                                pyautogui.typewrite('1')
+                                time.sleep(3)
+                                pyautogui.typewrite('2')
+                                time.sleep(3)
+                                print('Use some consumables')
+                            np.save(time.strftime("data/succ_%Y%m%d-%H%M%S"),data_new)
                         break
 
 ##                    if position < 137:
