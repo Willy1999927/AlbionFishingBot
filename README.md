@@ -33,6 +33,10 @@ pip install pipwin
 pipwin install pyaudio  
 pip install pillow  
 pip install opencv-python  
-pip install keras         -> This only works for x64 version Python  
-pip install tensorflow    -> This only works for Python 3.5-3.8 @ 11 NOV 2020  
-(pip install pyinstaller) -> This is for making the execuable file
+pip install keras  
+pip install tensorflow  
+(pip install pyinstaller) -> This is for making the execuable file  
+  
+You may need to install Microsoft Visual C++ 2015-2019 Redistributable (x64) to use tensorflow  
+keras only works for x64 version Python  
+tensorflow only works for Python 3.5-3.8 @ 11 NOV 2020
