@@ -26,7 +26,7 @@ print(x.shape)
 print(y.shape)
 print(y)
 
-model = keras.models.load_model('NN_model')
+model = keras.models.load_model('NN_model_1111')
 model.evaluate(x, y)
 print(model.predict(x))
 pred = model.predict(x)
