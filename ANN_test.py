@@ -16,17 +16,21 @@ for file in os.listdir('data'):
 
 x = np.array(x)
 y = np.array(y)
-print(x.shape)
-print(y.shape)
+#print(x.shape)
+#print(y.shape)
 
 p = np.random.permutation(len(x))
 x = x[p]
 y = y[p]
-print(x.shape)
-print(y.shape)
-print(y)
+#print(x.shape)
+#print(y.shape)
+#print(y)
+if count_succ<10 or count_fail<10:
+    print('warning, you do not have enough data for training a ANN model')
+    print('please run the main script without enabled ANN to collect more data')
 
-model = keras.models.load_model('NN_model_1111')
+
+model = keras.models.load_model('NN_model')
 model.evaluate(x, y)
 print(model.predict(x))
 pred = model.predict(x)

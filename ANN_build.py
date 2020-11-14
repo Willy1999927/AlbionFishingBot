@@ -22,6 +22,9 @@ x = np.array(x)
 y = np.array(y)
 print('succ: ',count_succ)
 print('fail: ',count_fail)
+if count_succ<10 or count_fail<10:
+    print('warning, you do not have enough data for training a ANN model')
+    print('please run the main script without enabled ANN to collect more data')
 
 p = np.random.permutation(len(x))
 x = x[p]
