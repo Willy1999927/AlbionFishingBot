@@ -7,6 +7,8 @@ This is a fully automatic bot that fishes in Albion Online. The functions includ
 
 The method of detecting fish catches is by sound, pyaudio lib. Please adjust the code yourself to fit your audio instrument, volume, and OS. Probably you need to edit the name of the speaker (Stereo or something probably) and the threshold to make this bot work.
 
+If you do not have an ANN model with you, please run the main script without enabled ANN in the branch. It will collect the data when fishing. You can further use these data to train your own model. The ANN involvement would imporve the overall performance by filtering out the footsteps from other players and the noise maken by the monsters.
+
 Tested on Windows 10. system volume: 30. Game setting: overall volume: 10. sound effect 75. 1920 * 1080, HUD 100% scale.  
 Tested on Windows 7.  same configuration.
 
