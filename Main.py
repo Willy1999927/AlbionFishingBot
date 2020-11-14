@@ -36,7 +36,7 @@ def use_fishing_bait():
 
 def get_position():  # Grab image, then find the Buoy
     capture = ImageGrab.grab(bbox=(839, 555, 1080, 556))  # Left, Upper, Right, Lower
-    threshold = 150
+    threshold = 200
     fn = lambda x: 255 if x > threshold else 0
     nums = np.array(capture.convert('L').point(fn, mode='1')).astype(int)
 
@@ -45,21 +45,18 @@ def get_position():  # Grab image, then find the Buoy
             return y + 7  
     return -1
 
-#setup console window
+# setup console window
 hwnd = GetForegroundWindow()
 title = GetWindowText(hwnd)
 print(title)
+if 'cmd.exe' in title or 'Main.exe' in title or 'Shell' in title:
+    SetWindowPos(hwnd, win32con.HWND_TOPMOST,0,840,640,240, 0)
 
 # setup NN model
 enable_NN = True        #disable this if you do not have the model
 if enable_NN:
     NN_model = load_model('NN_model')
 
-# Initialize Bot
-volume_factor = 1
-maxValue = 2**14
-bars = 35
-timer = time.time()
 # Find the name of the speaker. Stereo problably
 target = '立體聲混音'
 p=pyaudio.PyAudio()
@@ -78,7 +75,8 @@ if dev_idx == -1:
         print (devInfo)
     dev_idx = int(input('please input the audio device index: '))
 p.terminate()
-#load in figures
+
+# load in figures
 imgB = cv2.imread('bar_blue.png')
 img_B, temp1, temp2 = cv2.split(imgB)
 #wB, hB = img_B.shape[::-1]
@@ -88,8 +86,11 @@ temp1, temp2, img_R = cv2.split(imgR)
 thresholdB = 0.88
 thresholdR = 0.95
 
-if 'cmd.exe' in title or 'Main.exe' in title or 'Shell' in title:
-    SetWindowPos(hwnd, win32con.HWND_TOPMOST,0,600,640,480, 0)
+# Initialize Bot
+volume_factor = 1
+maxValue = 2**14
+bars = 35
+timer = time.time()
 
 while True:
     print("Bot Starting Up, Good Luck")
@@ -97,7 +98,7 @@ while True:
     fishpoint = 0
     fishX = []
     fishY = []
-    while True:
+    while True: # Bot configuration
         if keyboard.is_pressed('F9'):   #F9 to automatically adjust volume factor
             stream=p.open(input_device_index=dev_idx,format=pyaudio.paInt16,channels=2,rate=44100, input=True, frames_per_buffer=1024)
             #t = threading.Thread(target = beep)
@@ -124,6 +125,9 @@ while True:
                 fishX.append(x)
                 fishY.append(y)
             winsound.Beep(587, 200)
+            for i in range(5):
+                print('The bot will start in ',5-i,' seconds')
+                time.sleep(1)
             break
         if keyboard.is_pressed('F11'):  #F11 to add a new fishing point
             fishpoint = fishpoint+1
@@ -134,19 +138,19 @@ while True:
             winsound.Beep(523, 200)
             time.sleep(0.5)
         
-        
-    while True:
+    while True: # Repeat the Bot
         print('CPU: ',psutil.cpu_percent())
         print('CPU Details: ',psutil.cpu_freq(percpu=True))
         print('Memory: ',psutil.virtual_memory().percent)
         print('New round, cast rod                             ', end = ' \r')
         playerexist = False
-        while True:
+        while True: #Player detection
             print('Player detecting                            ', end = ' \r')
             capture = np.array(ImageGrab.grab(bbox=(50, 70, 1770, 1030)))  # Left, Upper, Right, Lower
             capture_R, capture_G, capture_B = cv2.split(capture)
             res = cv2.matchTemplate(capture_B,img_B,cv2.TM_CCOEFF_NORMED)
             loc = np.where(res >= thresholdB)
+            print ('B_max: ', np.max(res), '               ')
             #print (np.count_nonzero(res >= thresholdB))
             if np.count_nonzero(res >= thresholdB)>0:
                 for pt in zip(*loc[::-1]):
@@ -156,11 +160,12 @@ while True:
                 continue
             res = cv2.matchTemplate(capture_R,img_R,cv2.TM_CCOEFF_NORMED)
             loc = np.where( res >= thresholdR)
-            print (np.max(res),'               ')
+            print ('R_max: ', np.max(res), '               ')
             #print (np.count_nonzero(res >= thresholdR))
             if np.count_nonzero(res >= thresholdR)>0:
                 for pt in zip(*loc[::-1]):
                     print(pt, ' R              ')
+                pyautogui.typewrite('R')
                 time.sleep(random.uniform(10, 20))
                 playerexist = True
                 continue
@@ -168,13 +173,14 @@ while True:
             if playerexist:
                 time.sleep(random.uniform(20, 60))
             break
+        # cast rod
         fishpointselect = random.randint(0,fishpoint-1)
-        pyautogui.moveTo(fishX[fishpointselect]+random.randint(-5,5), fishY[fishpointselect]+random.randint(-5,5))
+        pyautogui.moveTo(fishX[fishpointselect]+random.randint(-2,2), fishY[fishpointselect]+random.randint(-2,2))
         #if fishpoint == 1:
         #    move(random.uniform(0.2, 0.5))
         cast_rod()
         over = False
-        time.sleep(3.0)
+        time.sleep(2.0)
         print('start to detect sound')
         stream=p.open(input_device_index=dev_idx,format=pyaudio.paInt16,channels=2,rate=44100, input=True, frames_per_buffer=1024)
         previoussum = 0
@@ -188,7 +194,7 @@ while True:
                 chunkcount = chunkcount+1
             elif previoussum==0:
                 chunkcount = 0
-            starString = "#"*volume+"-"*int(bars-volume-15)
+            starString = "#"*volume+"-"*int(bars-volume-10)
             print("Volume=[%s]"%(starString))
             if keyboard.is_pressed('F12'):
                 break
@@ -196,10 +202,11 @@ while True:
             if count > 1500:
                 move(0.1)
                 break
-            if volume>=6 or volume+previoussum>=9:
+            # adjust your system volume to fit the program or adjust the code to fit your volume
+            if volume>=6 or volume+previoussum>=9:  # when the sound is loud enough
                 if volume>=9 and chunkcount>3:
                     continue
-                if enable_NN:
+                if enable_NN:       # using Artificial Neural Network to judge the sound
                     dataL = data[0::2]
                     dataR = data[1::2]
                     data_new = np.array(dataL + dataR).reshape(1,4096)
@@ -213,7 +220,7 @@ while True:
                 stream.stop_stream()
                 stream.close()
                 #print("L=[%s]\tR=[%s], Start to catch fish"%(np.max(dataL), np.max(dataR)))
-                pyautogui.moveTo(fishX[fishpointselect]+random.randint(-5,5), fishY[fishpointselect]+random.randint(-5,5))
+                pyautogui.moveTo(fishX[fishpointselect], fishY[fishpointselect])
                 hold()  # catch fish
                 time.sleep(random.uniform(0.9, 1.0))
                 release()
@@ -228,13 +235,13 @@ while True:
                         dataL = data[0::2]
                         dataR = data[1::2]
                         data_new = dataL + dataR
-                        if times == 1:
+                        if times == 1:      # fail to catch fish
                             time.sleep(0.3)
                             if get_position() != -1:
                                 continue
                             print ('noise around')
                             time.sleep(random.uniform(5, 30))
-                            np.save(time.strftime("data/fail_%Y%m%d-%H%M%S"),data_new)
+                            np.save(time.strftime("data/fail_%Y%m%d-%H%M%S"),data_new)  # data collecting used for ANN
                         else:
                             if time.time()-timer > 1800:
                                 timer = time.time()
@@ -243,32 +250,17 @@ while True:
                                 pyautogui.typewrite('2')
                                 time.sleep(3)
                                 print('Use some consumables')
-                            np.save(time.strftime("data/succ_%Y%m%d-%H%M%S"),data_new)
+                            np.save(time.strftime("data/succ_%Y%m%d-%H%M%S"),data_new)  # data collecting used for ANN
                         break
-
-##                    if position < 137:
-##                        hold()  
-##                        time.sleep(random.uniform(0.1, 0.15))
-##                    elif position > 145:
-##                        release()  
-##                        time.sleep(random.uniform(0.005, 0.02))
-##                        hold()
-##                        time.sleep(random.uniform(0.035, 0.6))
-##                        if random.randint(0,1) == 1:
-##                            release()
-##                            time.sleep(random.uniform(0.005, 0.013))
-##                    elif position < 145:
-##                        hold()
-##                        time.sleep(random.uniform(0.03, 0.08))
-##                        release()
+                    # catching fish
                     if position < 137:
                         hold()
                         time.sleep(random.uniform(0.1, 0.15))
                     elif position > 145:
                         release()
-                        time.sleep(max(random.uniform(0.005, 0.02)-times/30000.,0))
+                        time.sleep(max(random.uniform(0.005, 0.02)-times/500000.,0))
                         hold()
-                        time.sleep(random.uniform(0.1, 0.6))
+                        time.sleep(random.uniform(0.1, 0.5))
                     else:
                         hold()
             previoussum = volume
