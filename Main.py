@@ -156,7 +156,7 @@ while True:
                 for pt in zip(*loc[::-1]):
                     print(pt, ' B              ')
                 temp = random.uniform(10, 20)
-                for i in temp:
+                for i in range(temp):
                     print('The bot will detect player again in ',temp-i,' seconds')
                     time.sleep(1)
                     if keyboard.is_pressed('F12'):
@@ -172,7 +172,7 @@ while True:
                     print(pt, ' R              ')
                 pyautogui.typewrite('R')
                 temp = random.uniform(10, 20)
-                for i in temp:
+                for i in range(temp):
                     print('The bot will detect player again in ',temp-i,' seconds')
                     time.sleep(1)
                     if keyboard.is_pressed('F12'):
@@ -182,7 +182,7 @@ while True:
             print('no player detected')
             if playerexist:
                 temp = random.uniform(20, 60)
-                for i in temp:
+                for i in range(temp):
                     print('The bot will detect player again in ',temp-i,' seconds')
                     time.sleep(1)
                     if keyboard.is_pressed('F12'):
@@ -256,7 +256,7 @@ while True:
                                 continue
                             print ('noise around')
                             temp = random.uniform(5, 30)
-                            for i in temp:
+                            for i in range(temp):
                                 print('The bot will restart again in ',temp-i,' seconds')
                                 time.sleep(1)
                                 if keyboard.is_pressed('F12'):
