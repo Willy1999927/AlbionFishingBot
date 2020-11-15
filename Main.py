@@ -50,7 +50,7 @@ hwnd = GetForegroundWindow()
 title = GetWindowText(hwnd)
 print(title)
 if 'cmd.exe' in title or 'Main.exe' in title or 'Shell' in title:
-    SetWindowPos(hwnd, win32con.HWND_TOPMOST,0,840,640,240, 0)
+    SetWindowPos(hwnd, win32con.HWND_TOPMOST,0,728,470,255, 0)
 
 # setup NN model
 enable_NN = True        #disable this if you do not have the model
@@ -142,10 +142,10 @@ while True:
         print('CPU: ',psutil.cpu_percent())
         print('CPU Details: ',psutil.cpu_freq(percpu=True))
         print('Memory: ',psutil.virtual_memory().percent)
-        print('New round, cast rod                             ', end = ' \r')
+        print('New round, cast rod                ', end = ' \r')
         playerexist = False
         while True: #Player detection
-            print('Player detecting                            ', end = ' \r')
+            print('Player detecting                   ', end = ' \r')
             capture = np.array(ImageGrab.grab(bbox=(50, 70, 1770, 1030)))  # Left, Upper, Right, Lower
             capture_R, capture_G, capture_B = cv2.split(capture)
             res = cv2.matchTemplate(capture_B,img_B,cv2.TM_CCOEFF_NORMED)
@@ -155,7 +155,7 @@ while True:
             if np.count_nonzero(res >= thresholdB)>0:
                 for pt in zip(*loc[::-1]):
                     print(pt, ' B              ')
-                temp = range(random.uniform(10, 20))
+                temp = random.uniform(10, 20)
                 for i in temp:
                     print('The bot will detect player again in ',temp-i,' seconds')
                     time.sleep(1)
@@ -171,7 +171,7 @@ while True:
                 for pt in zip(*loc[::-1]):
                     print(pt, ' R              ')
                 pyautogui.typewrite('R')
-                temp = range(random.uniform(10, 20))
+                temp = random.uniform(10, 20)
                 for i in temp:
                     print('The bot will detect player again in ',temp-i,' seconds')
                     time.sleep(1)
@@ -181,7 +181,7 @@ while True:
                 continue
             print('no player detected')
             if playerexist:
-                temp = range(random.uniform(20, 60))
+                temp = random.uniform(20, 60)
                 for i in temp:
                     print('The bot will detect player again in ',temp-i,' seconds')
                     time.sleep(1)
@@ -202,7 +202,7 @@ while True:
         count = 0
         chunkcount = 0
         while True:
-            print('Sound detecting                          ', end = ' \r')
+            print('Sound detecting                    ', end = ' \r')
             data = np.frombuffer(stream.read(4096),dtype=np.int16)
             volume = int(np.abs(np.max(data)-np.min(data))*volume_factor*bars/maxValue)
             if volume>0:
@@ -255,7 +255,7 @@ while True:
                             if get_position() != -1:
                                 continue
                             print ('noise around')
-                            temp = range(random.uniform(5, 30))
+                            temp = random.uniform(5, 30)
                             for i in temp:
                                 print('The bot will restart again in ',temp-i,' seconds')
                                 time.sleep(1)
