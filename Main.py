@@ -155,7 +155,12 @@ while True:
             if np.count_nonzero(res >= thresholdB)>0:
                 for pt in zip(*loc[::-1]):
                     print(pt, ' B              ')
-                time.sleep(random.uniform(10, 20))
+                temp = range(random.uniform(10, 20))
+                for i in temp:
+                    print('The bot will detect player again in ',temp-i,' seconds')
+                    time.sleep(1)
+                    if keyboard.is_pressed('F12'):
+                        break
                 playerexist = True
                 continue
             res = cv2.matchTemplate(capture_R,img_R,cv2.TM_CCOEFF_NORMED)
@@ -166,12 +171,22 @@ while True:
                 for pt in zip(*loc[::-1]):
                     print(pt, ' R              ')
                 pyautogui.typewrite('R')
-                time.sleep(random.uniform(10, 20))
+                temp = range(random.uniform(10, 20))
+                for i in temp:
+                    print('The bot will detect player again in ',temp-i,' seconds')
+                    time.sleep(1)
+                    if keyboard.is_pressed('F12'):
+                        break
                 playerexist = True
                 continue
             print('no player detected')
             if playerexist:
-                time.sleep(random.uniform(20, 60))
+                temp = range(random.uniform(20, 60))
+                for i in temp:
+                    print('The bot will detect player again in ',temp-i,' seconds')
+                    time.sleep(1)
+                    if keyboard.is_pressed('F12'):
+                        break
             break
         # cast rod
         fishpointselect = random.randint(0,fishpoint-1)
@@ -240,7 +255,12 @@ while True:
                             if get_position() != -1:
                                 continue
                             print ('noise around')
-                            time.sleep(random.uniform(5, 30))
+                            temp = range(random.uniform(5, 30))
+                            for i in temp:
+                                print('The bot will restart again in ',temp-i,' seconds')
+                                time.sleep(1)
+                                if keyboard.is_pressed('F12'):
+                                    break
                             np.save(time.strftime("data/fail_%Y%m%d-%H%M%S"),data_new)  # data collecting used for ANN
                         else:
                             if time.time()-timer > 1800:
