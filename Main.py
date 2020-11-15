@@ -155,7 +155,7 @@ while True:
             if np.count_nonzero(res >= thresholdB)>0:
                 for pt in zip(*loc[::-1]):
                     print(pt, ' B              ')
-                temp = random.uniform(10, 20)
+                temp = int(random.uniform(10, 20))
                 for i in range(temp):
                     print('The bot will detect player again in ',temp-i,' seconds')
                     time.sleep(1)
@@ -171,7 +171,7 @@ while True:
                 for pt in zip(*loc[::-1]):
                     print(pt, ' R              ')
                 pyautogui.typewrite('R')
-                temp = random.uniform(10, 20)
+                temp = int(random.uniform(10, 20))
                 for i in range(temp):
                     print('The bot will detect player again in ',temp-i,' seconds')
                     time.sleep(1)
@@ -181,7 +181,7 @@ while True:
                 continue
             print('no player detected')
             if playerexist:
-                temp = random.uniform(20, 60)
+                temp = int(random.uniform(20, 60))
                 for i in range(temp):
                     print('The bot will detect player again in ',temp-i,' seconds')
                     time.sleep(1)
@@ -255,7 +255,7 @@ while True:
                             if get_position() != -1:
                                 continue
                             print ('noise around')
-                            temp = random.uniform(5, 30)
+                            temp = int(random.uniform(5, 30))
                             for i in range(temp):
                                 print('The bot will restart again in ',temp-i,' seconds')
                                 time.sleep(1)
