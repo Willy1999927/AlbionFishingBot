@@ -3,13 +3,11 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 
-#print(os.listdir('data'))
 x = []
 y = []
 count_succ = 0
 count_fail = 0
 for file in os.listdir('data'):
-    #print (file)
     x.append(np.load('data/%s'%file))
     if 'fail' in file:
         y.append(0)
@@ -31,15 +29,14 @@ x = x[p]
 y = y[p]
 print(x.shape)
 print(y.shape)
-#print(y)
 
 model = Sequential()
-model.add(Dense(1024, input_dim=4096, activation='relu'))
+model.add(Dense(128, input_dim=4096, activation='relu'))
 model.add(Dropout(0.2))
-model.add(Dense(512, activation='relu'))
+model.add(Dense(64, activation='relu'))
 model.add(Dense(1, activation='sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.summary(line_length=None, positions=None, print_fn=None)
-model.fit(x, y, epochs=15, batch_size=50,validation_split=0.2)
+model.fit(x, y, epochs=20, batch_size=100,validation_split=0.2)
 
 model.save('NN_model')
