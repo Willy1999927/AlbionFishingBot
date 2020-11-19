@@ -36,7 +36,7 @@ def use_fishing_bait():
 
 def get_position():  # Grab image, then find the Buoy
     capture = ImageGrab.grab(bbox=(839, 555, 1080, 556))  # Left, Upper, Right, Lower
-    threshold = 200
+    threshold = 220
     fn = lambda x: 255 if x > threshold else 0
     nums = np.array(capture.convert('L').point(fn, mode='1')).astype(int)
 
@@ -84,7 +84,7 @@ imgR = cv2.imread('bar_red.png')
 temp1, temp2, img_R = cv2.split(imgR)
 #wR, hR = img_R.shape[::-1]
 thresholdB = 0.88
-thresholdR = 0.95
+thresholdR = 0.99
 
 # Initialize Bot
 volume_factor = 1
@@ -157,7 +157,7 @@ while True:
                     print(pt, ' B              ')
                 temp = int(random.uniform(10, 20))
                 for i in range(temp):
-                    print('The bot will detect player again in ',temp-i,' seconds')
+                    print('Detect player again in ',temp-i,' seconds')
                     time.sleep(1)
                     if keyboard.is_pressed('F12'):
                         break
@@ -173,7 +173,7 @@ while True:
                 pyautogui.typewrite('R')
                 temp = int(random.uniform(10, 20))
                 for i in range(temp):
-                    print('The bot will detect player again in ',temp-i,' seconds')
+                    print('Detect player again in ',temp-i,' seconds')
                     time.sleep(1)
                     if keyboard.is_pressed('F12'):
                         break
@@ -183,7 +183,7 @@ while True:
             if playerexist:
                 temp = int(random.uniform(20, 60))
                 for i in range(temp):
-                    print('The bot will detect player again in ',temp-i,' seconds')
+                    print('The bot will start in ',temp-i,' seconds')
                     time.sleep(1)
                     if keyboard.is_pressed('F12'):
                         break
@@ -257,7 +257,7 @@ while True:
                             print ('noise around')
                             temp = int(random.uniform(5, 30))
                             for i in range(temp):
-                                print('The bot will restart again in ',temp-i,' seconds')
+                                print('The bot will restart in ',temp-i,' seconds')
                                 time.sleep(1)
                                 if keyboard.is_pressed('F12'):
                                     break
